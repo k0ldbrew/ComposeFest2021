@@ -16,11 +16,7 @@
 
 package com.example.android.codelab.animation.ui.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -35,9 +31,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -179,8 +172,8 @@ fun Home() {
     val lazyListState = rememberLazyListState()
 
     // The background color. The value is changed by the current tab.
-    // TODO 1: Animate this color change.
-    val backgroundColor = if (tabPage == TabPage.Home) Purple100 else Green300
+    // 1. Animating a simple value change.
+    val backgroundColor by animateColorAsState(if (tabPage == TabPage.Home) Purple100 else Green300)
 
     // The coroutine scope for event handlers calling suspend functions.
     val coroutineScope = rememberCoroutineScope()
@@ -292,8 +285,8 @@ private fun HomeFloatingActionButton(
                 contentDescription = null
             )
             // Toggle the visibility of the content with animation.
-            // TODO 2-1: Animate this visibility change.
-            if (extended) {
+            // 2. Animate visibility.
+            AnimatedVisibility(extended) {
                 Text(
                     text = stringResource(R.string.edit),
                     modifier = Modifier
@@ -310,10 +303,16 @@ private fun HomeFloatingActionButton(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun EditMessage(shown: Boolean) {
-    // TODO 2-2: The message should slide down from the top on appearance and slide up on
-    //           disappearance.
     AnimatedVisibility(
-        visible = shown
+        visible = shown,
+        enter = slideInVertically(
+            initialOffsetY = {fullHeight -> -fullHeight },
+            animationSpec = tween(durationMillis = 150, easing = LinearOutSlowInEasing)
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = {fullHeight -> -fullHeight },
+            animationSpec = tween(durationMillis = 250, easing = FastOutLinearInEasing)
+        )
     ) {
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -382,11 +381,11 @@ private fun TopicRow(topic: String, expanded: Boolean, onClick: () -> Unit) {
         elevation = 2.dp,
         onClick = onClick
     ) {
-        // TODO 3: Animate the size change of the content.
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp)
+                .animateContentSize()
         ) {
             Row {
                 Icon(
